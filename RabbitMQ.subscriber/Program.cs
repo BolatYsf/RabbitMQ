@@ -1,30 +1,40 @@
-﻿
+﻿ 
 
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Configuration;
 using System.Text;
 
 var factory = new ConnectionFactory();
 
-factory.Uri = new Uri("amqps://imfunstt:bieg3kNUrb49XGjMrwQ3NUiSt2fYbdsq@shark.rmq.cloudamqp.com/imfunstt");
+string conStr = ConfigurationManager.ConnectionStrings["RabbitMQ"].ToString();
+
+factory.Uri = new Uri(conStr);
 
 using var connection = factory.CreateConnection();
 
 var channel = connection.CreateModel();
 
-//if u create queue in publisher . u would delete queue here!
+//channel.ExchangeDeclare("logs-fanout", durable: true, type: ExchangeType.Fanout);
 
-//channel.QueueDeclare("hello-rabbitmq", true, false, false);
+//var randomQueueName = channel.QueueDeclare().QueueName;
 
-// create consumer
+var randomQueueName = "log-db-queue";
 
+channel.QueueDeclare(randomQueueName,true,false,false);
+
+// bind fanout
+
+channel.QueueBind(randomQueueName,"logs-fanout","",null);
 
 channel.BasicQos(0,1,false);
 
 
 var consumer=new EventingBasicConsumer(channel);
 
-channel.BasicConsume("hello-rabbitmq",false,consumer);
+channel.BasicConsume(randomQueueName,false,consumer);
+
+Console.WriteLine("logs listening...");
 
 consumer.Received += (object sender, BasicDeliverEventArgs e) =>
 {
