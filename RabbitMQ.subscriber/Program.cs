@@ -2,11 +2,14 @@
 
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Configuration;
 using System.Text;
 
 var factory = new ConnectionFactory();
 
-factory.Uri = new Uri("amqps://imfunstt:bieg3kNUrb49XGjMrwQ3NUiSt2fYbdsq@shark.rmq.cloudamqp.com/imfunstt");
+string conStr = ConfigurationManager.ConnectionStrings["RabbitMQ"].ToString();
+
+factory.Uri = new Uri(conStr);
 
 using var connection = factory.CreateConnection();
 

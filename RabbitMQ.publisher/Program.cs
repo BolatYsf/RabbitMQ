@@ -1,23 +1,29 @@
 ﻿
 
 using RabbitMQ.Client;
+using System.Configuration;
 using System.Text;
 
 var factory = new ConnectionFactory();
 
 // conncet rabbitmq cloud
 
-factory.Uri = new Uri("amqps://imfunstt:bieg3kNUrb49XGjMrwQ3NUiSt2fYbdsq@shark.rmq.cloudamqp.com/imfunstt");
+string conStr = ConfigurationManager.ConnectionStrings["RabbitMQ"].ToString();
+
+
+factory.Uri = new Uri(conStr);
+
+
+
 
 using var connection=factory.CreateConnection();
 
-// create channel rabbitmq
 
 var channel = connection.CreateModel();
 
-// add queue in channel
+// create fanoutexchange
 
-channel.QueueDeclare("hello-rabbitmq",true,false,false);
+//channel.ExchangeDeclare("logs-fanout")
 
 Enumerable.Range(1, 50).ToList().ForEach(x =>
 {
