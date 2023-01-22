@@ -36,7 +36,7 @@ Enumerable.Range(1, 50).ToList().ForEach(x =>
     channel.BasicPublish(string.Empty, "hello-rabbitmq", null, messageBody);
 
     Console.WriteLine($"Message has sended: {message}");
-
+    
 });
 
 
