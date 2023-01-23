@@ -15,19 +15,24 @@ using var connection = factory.CreateConnection();
 
 var channel = connection.CreateModel();
 
-//if u create queue in publisher . u would delete queue here!
-
-//channel.QueueDeclare("hello-rabbitmq", true, false, false);
-
-// create consumer
-
-
 channel.BasicQos(0,1,false);
 
+var consumer = new EventingBasicConsumer(channel);
 
-var consumer=new EventingBasicConsumer(channel);
+var queueName = channel.QueueDeclare().QueueName;
 
-channel.BasicConsume("hello-rabbitmq",false,consumer);
+Dictionary<string,object> headers = new Dictionary<string, object>();
+
+headers.Add("format", "png");
+headers.Add("width", "200px");
+
+// must match all key-value
+
+headers.Add("x-match", "all");
+
+channel.QueueBind(queueName, "header-exchange",string.Empty,headers);
+
+channel.BasicConsume(queueName,false,consumer);
 
 consumer.Received += (object sender, BasicDeliverEventArgs e) =>
 {

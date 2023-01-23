@@ -10,34 +10,28 @@ var factory = new ConnectionFactory();
 
 string conStr = ConfigurationManager.ConnectionStrings["RabbitMQ"].ToString();
 
-
 factory.Uri = new Uri(conStr);
-
-
-
 
 using var connection=factory.CreateConnection();
 
-
 var channel = connection.CreateModel();
 
-// create fanoutexchange
+channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers);
 
-//channel.ExchangeDeclare("logs-fanout")
+// using dictionary class
 
-Enumerable.Range(1, 50).ToList().ForEach(x =>
-{
-    // write message and has send
+Dictionary<string,object> headers= new Dictionary<string, object>();
 
-    string message = $"Message{x}";
+headers.Add("format", "png");
+headers.Add("width", "200px");
 
-    var messageBody = Encoding.UTF8.GetBytes(message);
+var properties=channel.CreateBasicProperties();
 
-    channel.BasicPublish(string.Empty, "hello-rabbitmq", null, messageBody);
+properties.Headers = headers;
 
-    Console.WriteLine($"Message has sended: {message}");
-    
-});
+channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header message"));
+
+Console.WriteLine("Message has sended..");
 
 
 Console.ReadLine();
