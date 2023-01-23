@@ -15,19 +15,31 @@ using var connection = factory.CreateConnection();
 
 var channel = connection.CreateModel();
 
-//if u create queue in publisher . u would delete queue here!
-
-//channel.QueueDeclare("hello-rabbitmq", true, false, false);
-
-// create consumer
-
-
 channel.BasicQos(0,1,false);
-
 
 var consumer=new EventingBasicConsumer(channel);
 
-channel.BasicConsume("hello-rabbitmq",false,consumer);
+var queuename=channel.QueueDeclare().QueueName;
+
+// ll only listen to the route that write Error in the middle
+
+//var routeKey = "*.Error.*";
+
+// ending with warring
+
+//var routeKey = "*.*.Warning";
+
+// starts with Info then could be any one
+
+//var routeKey = "Info.#";
+
+var routeKey = "*.Info.Error";
+
+channel.QueueBind(queuename,"logs-topic",routeKey);
+
+channel.BasicConsume(queuename,false,consumer);
+
+Console.WriteLine("Logs loadin...");
 
 consumer.Received += (object sender, BasicDeliverEventArgs e) =>
 {
@@ -39,9 +51,6 @@ consumer.Received += (object sender, BasicDeliverEventArgs e) =>
     // u can delete sending message queue
     channel.BasicAck(e.DeliveryTag, false);
 };
-
-
-
 
 
 Console.ReadLine();
