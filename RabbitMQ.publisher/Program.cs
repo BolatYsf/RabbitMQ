@@ -29,6 +29,9 @@ var properties=channel.CreateBasicProperties();
 
 properties.Headers = headers;
 
+// properties become permanent 
+properties.Persistent = true;
+
 channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header message"));
 
 Console.WriteLine("Message has sended..");
