@@ -1,8 +1,10 @@
 ﻿
 
+using Entity;
 using RabbitMQ.Client;
 using System.Configuration;
 using System.Text;
+using System.Text.Json;
 
 var factory = new ConnectionFactory();
 
@@ -32,7 +34,13 @@ properties.Headers = headers;
 // properties become permanent 
 properties.Persistent = true;
 
-channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header message"));
+var personel = new Personel {Id=1,Name="John",Surname="Doe",Department="IT" };
+
+//serialize
+
+var personelJsonString=JsonSerializer.Serialize(personel);
+
+channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes(personelJsonString));
 
 Console.WriteLine("Message has sended..");
 

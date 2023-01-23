@@ -1,9 +1,11 @@
 ﻿
 
+using Entity;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Configuration;
 using System.Text;
+using System.Text.Json;
 
 var factory = new ConnectionFactory();
 
@@ -28,7 +30,7 @@ headers.Add("width", "200px");
 
 // must match all key-value
 
-headers.Add("x-match", "all");
+headers.Add("x-match", "any");
 
 channel.QueueBind(queueName, "header-exchange",string.Empty,headers);
 
@@ -37,9 +39,12 @@ channel.BasicConsume(queueName,false,consumer);
 consumer.Received += (object sender, BasicDeliverEventArgs e) =>
 {
     var message = Encoding.UTF8.GetString(e.Body.ToArray());
+    
+    Personel personel = JsonSerializer.Deserialize<Personel>(message);
+    
     Thread.Sleep(1500);
 
-    Console.WriteLine("Message:" + message);
+    Console.WriteLine($"Message:{personel.Id}-{personel.Name}-{personel.Surname}-{personel.Department}");
 
     // u can delete sending message queue
     channel.BasicAck(e.DeliveryTag, false);
